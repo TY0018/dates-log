@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		077245E92C949D73006F4E7C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 077245E82C949D73006F4E7C /* .gitignore */; };
 		077748FE2C8B0D16001401C5 /* dates_logApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077748FD2C8B0D16001401C5 /* dates_logApp.swift */; };
 		077749002C8B0D16001401C5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077748FF2C8B0D16001401C5 /* ContentView.swift */; };
 		077749022C8B0D18001401C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 077749012C8B0D18001401C5 /* Assets.xcassets */; };
@@ -63,6 +64,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		077245E82C949D73006F4E7C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		077748FA2C8B0D16001401C5 /* dates-log.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "dates-log.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		077748FD2C8B0D16001401C5 /* dates_logApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dates_logApp.swift; sourceTree = "<group>"; };
 		077748FF2C8B0D16001401C5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 				077749012C8B0D18001401C5 /* Assets.xcassets */,
 				077749032C8B0D18001401C5 /* dates_log.entitlements */,
 				077749042C8B0D18001401C5 /* Preview Content */,
+				077245E82C949D73006F4E7C /* .gitignore */,
 			);
 			path = "dates-log";
 			sourceTree = "<group>";
@@ -384,6 +387,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				077245E92C949D73006F4E7C /* .gitignore in Resources */,
 				077749062C8B0D18001401C5 /* Preview Assets.xcassets in Resources */,
 				0777495A2C8DEEC8001401C5 /* GoogleService-Info.plist in Resources */,
 				077749582C8DEEC0001401C5 /* credentials.plist in Resources */,
