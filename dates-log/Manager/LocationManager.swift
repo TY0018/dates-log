@@ -17,7 +17,8 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
 
     @Published var mapMode: MapMode = .viewTrips
     
-    @Published var mapView: MKMapView = .init()
+    @Published var mainMapView: MKMapView = .init()
+    @Published var addLogMapView: MKMapView = .init()
     @Published var manager: CLLocationManager = .init()
     
     //AddLogMapView
@@ -34,32 +35,18 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     //MainMapView
     //selected cur trip locations
     @Published var curTripLocations: [DateEvent] = []
-    //selected trip to dislpay details
+    //selected trip to display details
     @Published var selectedTrip: DateEvent?
     
     override private init() {
         super.init()
-        mapView.delegate = self
+        mainMapView.delegate = self
+        addLogMapView.delegate = self
         manager.delegate = self
         
         //requesting location access
         manager.requestWhenInUseAuthorization()
         
-        //watch textfield change
-        cancellable = $searchText
-            .debounce(for:.seconds(0.5), scheduler: DispatchQueue.main)
-            .removeDuplicates()
-            .sink(receiveValue: {value in
-                if value != "" {
-                    self.fetchPlaces(value:value)
-                } else {
-                    self.fetchedPlaces = nil
-                }
-            })
-    }
-    
-    deinit {
-        cancellable?.cancel()
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -98,6 +85,19 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     func handleLocationError() {
         print("Location access denied.")
     }
+    
+    func switchMapMode(to newMode: MapMode) {
+        mapMode = newMode
+        if newMode == .viewTrips {
+            addLogMapView.removeAnnotations(addLogMapView.annotations) // Clear addLogMapView
+            updateAnnotations() // Update mainMapView with trip markers
+            setRegionToFitTrips()
+        } else if newMode == .addLog {
+            mainMapView.removeAnnotations(mainMapView.annotations) // Clear mainMapView
+            // Prepare addLogMapView for adding a new log
+        }
+    }
+    
     //AddLogMapView
     //fetch places from search
     func fetchPlaces(value: String) {
@@ -117,16 +117,19 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
             }
         }
     }
-    //add draggable pins
+    //addLogMapView: add draggable pins
     func addDraggablePin(coordinate: CLLocationCoordinate2D){
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = coordinate
-        annotation.title = "Date Location"
-        print("annotation", annotation)
-        mapView.addAnnotation(annotation)
+        if mapMode == .addLog {
+            addLogMapView.removeAnnotations(addLogMapView.annotations)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            annotation.title = "Date Location"
+            print("annotation", annotation)
+            addLogMapView.addAnnotation(annotation)
+        }
     }
     
-    //enable dragging
+    //addLogMapView: enable dragging
     func mapView(_ mapView: MKMapView, viewFor annotation:MKAnnotation) -> MKAnnotationView? {
         if mapMode == .addLog {
             let marker = MKMarkerAnnotationView(annotation:annotation, reuseIdentifier:"Date Location")
@@ -137,20 +140,24 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
         }
         return nil
     }
+    
     //update new placemark
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, didChange newState: MKAnnotationView.DragState, fromOldState oldState: MKAnnotationView.DragState) {
         guard let newLocation = view.annotation?.coordinate else {
             return
         }
-        self.pickedLocation = .init(latitude:newLocation.latitude, longitude: newLocation.longitude)
-        updatePlacemark(location: .init(latitude:newLocation.latitude, longitude:newLocation.longitude))
+        if mapMode == .addLog{
+            self.pickedLocation = .init(latitude:newLocation.latitude, longitude: newLocation.longitude)
+            updatePlacemark(location: .init(latitude:newLocation.latitude, longitude:newLocation.longitude))
+        }
     }
-    
     
     func updatePlacemark(location:CLLocation){
         Task{
             do{
-                guard let place = try await reverseLocationCoordinates(location: location) else {return}
+                guard let place = try await reverseLocationCoordinates(location: location) else {
+                    return
+                }
                 await MainActor.run(body: {self.pickedPlaceMark = place}
                 )
             } catch {
@@ -161,6 +168,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     
     //displaying new location data
     func reverseLocationCoordinates(location: CLLocation)async throws->CLPlacemark?{
+        print("location in reverse: ", location)
         let place = try await CLGeocoder().reverseGeocodeLocation(location).first
         return place
     }
@@ -169,6 +177,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     //fetch trips for selected group
     func updateTrips(trips: [DateEvent]){
         self.curTripLocations = trips
+        print("upadte trips")
         updateAnnotations()
         setRegionToFitTrips()
     }
@@ -183,43 +192,54 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
         }
     }
 
+    func removeTrip(by title: String) {
+        if let index = curTripLocations.firstIndex(where: { $0.title == title }) {
+            curTripLocations.remove(at: index)
+        }
+    }
+    
     //for MainMapView: showing trip markers
     func updateAnnotations() {
         if mapMode == .viewTrips {
-            mapView.removeAnnotations(mapView.annotations)
-            for trip in self.curTripLocations {
+            mainMapView.removeAnnotations(mainMapView.annotations)
+            for trip in curTripLocations {
                 let coordinate = trip.coordinate
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
                 annotation.title = trip.title
-                mapView.addAnnotation(annotation)
+                mainMapView.addAnnotation(annotation)
             }
+            print("finish adding new annotations")
         }
     }
     
     // Function to set the map region to fit all trip coordinates
     func setRegionToFitTrips() {
-        guard !self.curTripLocations.isEmpty else { return }
+        if mapMode == .viewTrips {
+            print("setting region")
+            guard !self.curTripLocations.isEmpty else { return }
 
-        // Find the minimum and maximum latitude and longitude from curTripLocations
-        let minLat = self.curTripLocations.map { $0.coordinate.latitude }.min()!
-        let maxLat = self.curTripLocations.map { $0.coordinate.latitude }.max()!
-        let minLon = self.curTripLocations.map { $0.coordinate.longitude }.min()!
-        let maxLon = self.curTripLocations.map { $0.coordinate.longitude }.max()!
+            // Find the minimum and maximum latitude and longitude from curTripLocations
+            let minLat = self.curTripLocations.map { $0.coordinate.latitude }.min()!
+            let maxLat = self.curTripLocations.map { $0.coordinate.latitude }.max()!
+            let minLon = self.curTripLocations.map { $0.coordinate.longitude }.min()!
+            let maxLon = self.curTripLocations.map { $0.coordinate.longitude }.max()!
 
-        // Calculate the center of the region
-        let centerLat = (minLat + maxLat) / 2
-        let centerLon = (minLon + maxLon) / 2
-        let center = CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon)
+            // Calculate the center of the region
+            let centerLat = (minLat + maxLat) / 2
+            let centerLon = (minLon + maxLon) / 2
+            let center = CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon)
 
-        // Calculate the span (the zoom level) based on the difference between min and max coordinates
-        let spanLat = maxLat - minLat
-        let spanLon = maxLon - minLon
-        let span = MKCoordinateSpan(latitudeDelta: spanLat * 1.2, longitudeDelta: spanLon * 1.2) // Add some padding (1.2 multiplier)
+            // Calculate the span (the zoom level) based on the difference between min and max coordinates
+            let spanLat = maxLat - minLat
+            let spanLon = maxLon - minLon
+            let span = MKCoordinateSpan(latitudeDelta: spanLat * 1.2, longitudeDelta: spanLon * 1.2) // Add some padding (1.2 multiplier)
 
-        // Set the region
-        let region = MKCoordinateRegion(center: center, span: span)
-        mapView.setRegion(region, animated: true)
+            // Set the region
+            let region = MKCoordinateRegion(center: center, span: span)
+            mainMapView.setRegion(region, animated: true)
+        }
+        
     }
 
 

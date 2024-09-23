@@ -13,7 +13,7 @@ struct DateEvent: Codable {
     let coordinate: GeoPoint //geopoint data struct from firestore
     let title: String
     let description: String
-    let rating: Float
+    let rating: Double
     let date: Date
     let isFavourite: Bool
     
@@ -22,5 +22,17 @@ struct DateEvent: Codable {
         annotation.title = title
         annotation.coordinate = CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
         return annotation
+    }
+    
+    // Convert your object to a dictionary for saving in Firestore
+    func toDict() -> [String: Any] {
+        return [
+            "coordinate": coordinate,
+            "title": title,
+            "description": description,
+            "rating": rating,
+            "date": Timestamp(date: date), // Convert Date to Firestore Timestamp
+            "isFavourite": isFavourite
+        ]
     }
 }

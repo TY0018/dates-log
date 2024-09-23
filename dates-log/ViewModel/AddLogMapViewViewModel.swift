@@ -11,14 +11,14 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class AddLogMapViewViewModel: ObservableObject {
-
+    
     @Published var checkConfirm: Bool = false //bool to allow the confirm location sheet to appear
     @Published var finishAdding: Bool = false //bool to go back to MainMapView
     //Date details
     @Published var placeName: String = ""
     @Published var placeLocation: CLLocation? = nil
     @Published var date: Date = Date()
-    @Published var rating: Float = 1
+    @Published var rating: Double = 1
     @Published var description: String = ""
     @Published var group: String = "No group selected"
     @Published var isFavourite: Bool = false
@@ -30,7 +30,7 @@ class AddLogMapViewViewModel: ObservableObject {
     }
     
     //func saves date to corr group
-    func saveDate(){
+    func saveDate() {
         guard canSave else {
             return
         }
@@ -60,17 +60,64 @@ class AddLogMapViewViewModel: ObservableObject {
             .document(group)
             .collection("trips")
             .document(placeName)
-            .setData(newDate.asDictionary())
+            .setData(newDate.toDict())
         
         //add to favourites as well
         if isFavourite {
+            //check if group exists, otherwise create new group
+            Task {
+                do {
+                    let exists = try await checkGroupExists(group: "Favourites")
+                    if !exists {
+                        UserManager.shared.createNewGroup(groupName:"Favourites")
+                    }
+                } catch {
+                    print("Error checking group exists: \(error)")
+                }
+            }
+            
             db.collection("users")
                 .document(user.uid)
                 .collection("groups")
                 .document("Favourites")
                 .collection("trips")
                 .document(placeName)
-                .setData(newDate.asDictionary())
+                .setData(newDate.toDict())
+        }
+        
+        //reset variables after date is saved
+        placeName = ""
+        placeLocation = nil
+        date = Date()
+        rating = 1
+        description = ""
+        group = "No group selected"
+        isFavourite = false
+    }
+    
+    
+    
+    private func checkGroupExists(group: String) async throws -> Bool {
+        //get current user
+        guard let user = Auth.auth().currentUser else {
+            return false
+        }
+        let db = Firestore.firestore()
+
+        do {
+            let snapshot = try await db.collection("users")
+                .document(user.uid)
+                .collection("groups")
+                .document(group)
+                .getDocument()
+            
+            if snapshot.exists {
+                return true
+            }
+            return false
+        } catch {
+            print("Error checking group exists: \(error)")
+            throw error
         }
     }
     

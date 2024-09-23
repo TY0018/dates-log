@@ -11,18 +11,18 @@ import MapKit
 //UIKit MapView
 struct MapViewHelper: UIViewRepresentable {
     @EnvironmentObject var locationManager: LocationManager
+    @Binding var mapView: MKMapView
     
     func makeUIView(context: Context) -> MKMapView {
-        let mapView = locationManager.mapView
-        mapView.mapType = .standard  // Make sure to set the map type
         return mapView
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        locationManager.updateAnnotations()
+
     }
 }
 #Preview {
-    MapViewHelper()
+    MapViewHelper(
+        mapView:.constant(LocationManager.shared.mainMapView))
         .environmentObject(LocationManager.shared)
 }

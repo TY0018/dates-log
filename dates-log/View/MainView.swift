@@ -9,11 +9,12 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject var locationManager: LocationManager = LocationManager.shared
-    
+    @StateObject var userManager: UserManager = UserManager.shared
     var body: some View {
         TabView{
             MainMapView()
                 .environmentObject(locationManager)
+                .environmentObject(userManager)
                 .tabItem{
                     Label("Map",
                     systemImage: "map.fill")

@@ -42,28 +42,31 @@ struct AddLogView: View {
                 }
                 .frame(maxWidth: .infinity, alignment:.leading)
                 .padding(.vertical, 10)
-                NavigationLink(
-                    destination: AddDetailsView(viewModel:viewModel, place: place)
-                        .navigationTitle("Add Details")
-                        .bold()
-                ) {
-                    Text("Confirm Location")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color("MainPurple"))
+                NavigationLink(destination: AddDetailsView(viewModel: viewModel, place: place)
+                                .navigationTitle("Add Details")
+                                .bold()) {
+                                Text("Confirm Location")
+                                    .fontWeight(.semibold)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background {
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .fill(Color("MainPurple"))
+                                    }
+                                    .overlay(alignment: .trailing) {
+                                        Image(systemName: "arrow.right")
+                                            .font(.title3.bold())
+                                            .padding(.trailing)
+                                    }
+                                    .foregroundColor(.white)
+                            }
+                            .simultaneousGesture(TapGesture().onEnded {
+                                // Update the view model with the selected place
+                                viewModel.placeLocation = place.location
+                                viewModel.placeName = place.name ?? ""
+                            })
+                            .frame(maxHeight: .infinity, alignment: .bottom)
                         }
-                        .overlay(alignment: .trailing) {
-                            Image(systemName: "arrow.right")
-                                .font(.title3.bold())
-                                .padding(.trailing)
-                        }
-                        .foregroundColor(.white)
-                }
-                .frame(maxHeight:.infinity, alignment:.bottom)
-                }
             .navigationTitle("Confirm Location")
                 .bold()
         }
@@ -113,7 +116,9 @@ struct AddDetailsView: View {
                         Text("No group selected").tag("No group selected" as String)
                         //list of existing groups
                         ForEach(userManager.groups, id: \.self) { group in
-                            Text(group).tag(group as String)
+                            if group != "Favourites" {
+                                Text(group).tag(group as String)
+                            }
                         }
                         
                         // Add a "Create New Trip" option at the end
@@ -193,9 +198,6 @@ struct AddDetailsView: View {
             .padding(.horizontal, 2)
             Button{
                 //Add to trip in firebase
-                //set place coordinates
-                viewModel.placeLocation = place?.location
-                viewModel.placeName = place?.name ?? ""
                 viewModel.saveDate()
                 //close the sheet and navigate back to main map view
                 viewModel.checkConfirm = false
@@ -207,10 +209,11 @@ struct AddDetailsView: View {
                     .padding(.vertical, 12)
                     .background{
                         RoundedRectangle(cornerRadius: 10, style:.continuous)
-                            .fill(Color("MainPurple"))
+                            .fill(viewModel.canSave ? Color("MainPurple") : Color.gray)
                     }
                     .foregroundColor(.white)
             }
+            .disabled(!viewModel.canSave) // Disable button until all required fields are filled
             .padding()
             .frame(maxWidth:.infinity,maxHeight:.infinity)
         }

@@ -54,6 +54,7 @@ class UserManager: ObservableObject {
             .getDocuments { (querySnapshot, error) in
                 if let querySnapshot = querySnapshot {
                     self.groups = querySnapshot.documents.map{document in
+                        print("fetch groups: ", document.documentID)
                         return document.documentID
                     }
                 }
@@ -93,17 +94,26 @@ class UserManager: ObservableObject {
         let db = Firestore.firestore()
 
         do {
+            print("userId: ", self.userId)
+            print("group: ", group)
             let snapshot = try await db.collection("users")
                 .document(self.userId)
                 .collection("groups")
                 .document(group)
                 .collection("trips")
                 .getDocuments()
-
+            
+            print("docs: ", snapshot.documents)
+            
             let trips = snapshot.documents.compactMap { document -> DateEvent? in
-                try? document.data(as: DateEvent.self)
+                do {
+                        return try document.data(as: DateEvent.self)
+                    } catch {
+                        print("Failed to decode document: \(document.documentID), error: \(error)")
+                        return nil
+                    }
             }
-
+            print("trips in user manager: ", trips)
             return trips
         } catch {
             print("Error fetching trips: \(error)")

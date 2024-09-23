@@ -27,10 +27,25 @@ struct AddLogMapView: View, Hashable {
         // Use the unique identifier to generate the hash value
         hasher.combine(id)
     }
+    
+    var navBackBtn: some View {
+        Button(action: {
+            //pop last item out of navigation stack
+            print("remove search view from stack")
+            navigationPath.removeLast()
+        }) {
+            HStack {
+                Image(systemName: "chevron.backward") // set image here
+                    .aspectRatio(contentMode: .fit)
+                Text("Back")
+            }
+            .foregroundColor(Color("MainPurple"))
+        }
+    }
+        
     var body: some View {
-//        NavigationStack{
             ZStack{
-                MapViewHelper()
+                MapViewHelper(mapView: $locationManager.addLogMapView)
                     .environmentObject(locationManager)
                     .ignoresSafeArea()
             }
@@ -40,11 +55,9 @@ struct AddLogMapView: View, Hashable {
                         viewModel.checkConfirm = true
                     }
             }
-            .onDisappear {
-                locationManager.pickedLocation = nil
-                locationManager.pickedPlaceMark = nil
-                locationManager.mapView.removeAnnotations(locationManager.mapView.annotations)
-            }
+            
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(leading: navBackBtn)
             .sheet(isPresented:$viewModel.checkConfirm){
                 AddLogView(confirm:$viewModel.checkConfirm, viewModel:viewModel)
                     .presentationDetents([.medium, .large]) // This sets the sheet to either medium or large height
@@ -53,11 +66,15 @@ struct AddLogMapView: View, Hashable {
                                 // When the sheet closes, navigate back
                                 print(navigationPath)
                                 if viewModel.finishAdding {
+                                    locationManager.pickedLocation = nil
+                                    locationManager.pickedPlaceMark = nil
+//                                    locationManager.addLogMapView.removeAnnotations(locationManager.addLogMapView.annotations)
+//                                    locationManager.switchMapMode(to: .viewTrips)
+
                                     navigationPath.removeLast(navigationPath.count)
                                 }
                             }
             }
-//        }
     }
 }
 
