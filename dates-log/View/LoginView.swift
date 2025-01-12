@@ -16,16 +16,20 @@ struct LoginView: View {
     var body: some View {
         VStack {
             Spacer()
-            Text("Welcome")
-                .font(.largeTitle)
-                .bold()
-            Text("Sign in to begin!")
-                .font(.title3)
+            Image("datelogo")
+                .resizable()
+                .frame(maxWidth:400, maxHeight: 400)
+//            Text("Welcome")
+//                .font(.largeTitle)
+//                .bold()
+//            Text("Sign in to begin!")
+//                .font(.title3)
 //           GoogleSignInButton(action:authManager.handleSignInButton)
             SignInButton()
             Spacer()
-            
         }
+        .foregroundStyle(Color("Beige"))
+        .background(Color("MainPurple"))
     }
     
     @ViewBuilder
@@ -48,7 +52,7 @@ struct LoginView: View {
                     }
                     .padding()
                     
-                }.padding()
+                }.padding(.horizontal, 40)
             }
             .frame(maxWidth: .infinity)
                 .fixedSize(horizontal: false, vertical: true) // Ensure height fits content

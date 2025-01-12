@@ -22,7 +22,7 @@ struct MainMapView: View {
                     .environmentObject(locationManager)
                     .ignoresSafeArea()
 
-                TripSelector(viewModel: viewModel)
+                GroupSelector(viewModel: viewModel)
                     .environmentObject(locationManager)
                     .environmentObject(userManager)
                     .position(x: UIScreen.main.bounds.width / 2, y:30)
@@ -59,27 +59,39 @@ struct MainMapView: View {
             .navigationDestination(for: SearchView.self) { view in
                             view
                         }
-            .sheet(isPresented: $viewModel.showTripDetails) {
+            .sheet(isPresented: $viewModel.showTripDetails,
+                   onDismiss: {
+                        // Deselect the selected annotation when the sheet is dismissed
+                        if let selectedTrip = locationManager.selectedTrip?.0 {
+                            locationManager.mainMapView.deselectAnnotation(selectedTrip as? MKAnnotation, animated: true)
+                            print("sheet onDisappear")
+                            locationManager.selectedTrip = nil
+                        }
+                }
+            ) {
                 if let selectedTrip = locationManager.selectedTrip {
-                    TripView(trip: $locationManager.selectedTrip, viewModel:viewModel)
+                    PagedInstancesView(instances: selectedTrip.1)
                         .presentationDetents([.medium, .large])
-                                .presentationDragIndicator(.visible)
+                        .presentationDragIndicator(.visible)
+                        .onAppear(){
+                            print("on appear tab view: ", locationManager.selectedTrip?.1 ?? "no trip")
+                        }
+//                        .onDisappear(
+//                            perform: {
+//                                
+//                            }
+//                        )
                 }
             }
-            .onChange(of: locationManager.selectedTrip?.title, initial:true) { _, _ in
+            .onChange(of: locationManager.selectedTrip?.0, initial:true) { _, _ in
                 viewModel.showTripDetails = locationManager.selectedTrip != nil
             }
-            .onDisappear(
-                perform: {
-                    locationManager.selectedTrip = nil
-                }
-            )
         }
     }
 }
 
 //Menu button at the top
-struct TripSelector: View {
+struct GroupSelector: View {
     @EnvironmentObject var userManager:UserManager
     @EnvironmentObject var locationManager: LocationManager
     @ObservedObject var viewModel:MainMapViewViewModel
@@ -91,9 +103,15 @@ struct TripSelector: View {
                 HStack(spacing:5){
                         Image(systemName: "xmark.circle")
                         Spacer()
-                        Text("No group selected")
+                        Text("Select group to view Dates")
                     }
-                    .tag("No group selected" as String)
+                    .tag("Select group to view Dates" as String)
+                HStack(spacing:5){
+                        Image(systemName: "suit.heart.fill")
+                        Spacer()
+                        Text("Favourites")
+                    }
+                    .tag("Favourites" as String)
                 //list of existing groups
                 ForEach(userManager.groups, id: \.self) { group in
                     HStack {
@@ -114,6 +132,30 @@ struct TripSelector: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
+    }
+}
+
+struct PagedInstancesView: View {
+    var instances: [DateInstance] // Array of DateInstance
+
+    var body: some View {
+        NavigationStack{
+            TabView {
+                ForEach(instances, id: \.date) { instance in // Ensure each instance has a unique id
+                    TripDetailsInstanceView(instance: instance)
+                }
+                .padding()
+            }
+            .tabViewStyle(PageTabViewStyle()) // Set the tab view style to page
+        }
+        .padding(.bottom, 10)
+        .onAppear {
+            // Customize the page control appearance at the bottom
+            let appearance = UIPageControl.appearance()
+            appearance.currentPageIndicatorTintColor = UIColor(red: 0.76, green: 0.43, blue: 0.55, alpha: 1.0) // Color of the selected page indicator
+            appearance.pageIndicatorTintColor = UIColor.gray // Color of the unselected page indicators
+        }
+        .frame(maxHeight: .infinity) // Set a height for the TabView
     }
 }
 

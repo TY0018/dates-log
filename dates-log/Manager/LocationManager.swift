@@ -34,9 +34,9 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     
     //MainMapView
     //selected cur trip locations
-    @Published var curTripLocations: [DateEvent] = []
+    @Published var curTripLocations: [String: (CLLocationCoordinate2D, [DateInstance])] = [:]
     //selected trip to display details
-    @Published var selectedTrip: DateEvent?
+    @Published var selectedTrip: (CLLocationCoordinate2D, [DateInstance])? = nil
     
     override private init() {
         super.init()
@@ -175,38 +175,57 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     
     //MainMapView
     //fetch trips for selected group
-    func updateTrips(trips: [DateEvent]){
+    func updateTrips(trips: [String: (CLLocationCoordinate2D, [DateInstance])]){
         self.curTripLocations = trips
-        print("upadte trips")
+        print("update trips")
         updateAnnotations()
         setRegionToFitTrips()
     }
     
     //for MainMapView: showing trip markers
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        if mapMode == .viewTrips, let title = view.annotation?.title {
-            // Find the trip that matches the annotation title
-            if let trip = curTripLocations.first(where: { $0.title == title }) {
-                        selectedTrip = trip
-                    }
+        guard let annotation = view.annotation else {
+            print("unselected")
+            LocationManager.shared.selectedTrip = nil // Safely set selectedTrip to nil when deselected
+            return
+        }
+    
+        if mapMode == .viewTrips, let title = annotation.title ?? "" {
+                // Find the trip that matches the annotation title using the curTrips dictionary
+                if let tripData = curTripLocations[title] {
+                    print("selected")
+                    selectedTrip = tripData // Assuming you want to access the tuple (CLLocationCoordinate2D, [DateInstance])
+                } else {
+                    print("annotation but no match")
+                    LocationManager.shared.selectedTrip = nil
+                }
+            }
+    }
+    
+    // MKMapView Delegate for deselecting annotations
+    func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
+        if mapMode == .viewTrips {
+            print("deselected")
+            // Reset the selected trip when no marker is selected
+            LocationManager.shared.selectedTrip = nil
         }
     }
 
     func removeTrip(by title: String) {
-        if let index = curTripLocations.firstIndex(where: { $0.title == title }) {
-            curTripLocations.remove(at: index)
-        }
+        //remove specific instance
+        // check if instances is empty, if yes, remove trip
+        curTripLocations.removeValue(forKey: title)
     }
     
     //for MainMapView: showing trip markers
     func updateAnnotations() {
         if mapMode == .viewTrips {
             mainMapView.removeAnnotations(mainMapView.annotations)
-            for trip in curTripLocations {
-                let coordinate = trip.coordinate
+            //ignore 2nd element in the tuple
+            for (placeName, (coordinate, _)) in curTripLocations {
                 let annotation = MKPointAnnotation()
-                annotation.coordinate = CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                annotation.title = trip.title
+                annotation.coordinate = coordinate // Use the CLLocationCoordinate2D directly
+                annotation.title = placeName // Use the place name as the title
                 mainMapView.addAnnotation(annotation)
             }
             print("finish adding new annotations")
@@ -217,13 +236,17 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     func setRegionToFitTrips() {
         if mapMode == .viewTrips {
             print("setting region")
-            guard !self.curTripLocations.isEmpty else { return }
+            guard !curTripLocations.isEmpty else { return }
 
-            // Find the minimum and maximum latitude and longitude from curTripLocations
-            let minLat = self.curTripLocations.map { $0.coordinate.latitude }.min()!
-            let maxLat = self.curTripLocations.map { $0.coordinate.latitude }.max()!
-            let minLon = self.curTripLocations.map { $0.coordinate.longitude }.min()!
-            let maxLon = self.curTripLocations.map { $0.coordinate.longitude }.max()!
+
+            // Extract all coordinates from curTrips
+            let coordinates = curTripLocations.map { $0.value.0 } // Get the CLLocationCoordinate2D
+
+            // Find the minimum and maximum latitude and longitude
+            let minLat = coordinates.map { $0.latitude }.min()!
+            let maxLat = coordinates.map { $0.latitude }.max()!
+            let minLon = coordinates.map { $0.longitude }.min()!
+            let maxLon = coordinates.map { $0.longitude }.max()!
 
             // Calculate the center of the region
             let centerLat = (minLat + maxLat) / 2
@@ -233,7 +256,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
             // Calculate the span (the zoom level) based on the difference between min and max coordinates
             let spanLat = maxLat - minLat
             let spanLon = maxLon - minLon
-            let span = MKCoordinateSpan(latitudeDelta: spanLat * 1.2, longitudeDelta: spanLon * 1.2) // Add some padding (1.2 multiplier)
+            let span = MKCoordinateSpan(latitudeDelta: spanLat * 1.2, longitudeDelta: spanLon * 1.2) // Add some padding
 
             // Set the region
             let region = MKCoordinateRegion(center: center, span: span)

@@ -91,6 +91,10 @@ class AuthenticationManager: ObservableObject {
         db.collection("users")
             .document(uId)
             .setData(newUser.asDictionary())
+//        db.collection("users")
+//            .document(uId)
+//            .collection("Favourites")
+//            .setData([:])
     }
     
     //handle error

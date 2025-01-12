@@ -154,8 +154,9 @@ struct SearchView: View, Hashable {
             }
             .padding()
             .frame(maxHeight:.infinity, alignment:.top)
-                
+            .toolbar(.hidden, for: .tabBar)
             }
+        
     }
 
 

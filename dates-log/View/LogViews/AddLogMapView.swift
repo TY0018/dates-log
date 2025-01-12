@@ -48,32 +48,35 @@ struct AddLogMapView: View, Hashable {
                 MapViewHelper(mapView: $locationManager.addLogMapView)
                     .environmentObject(locationManager)
                     .ignoresSafeArea()
+                
+                // AddDetailsView Overlay (new page that slides up)
+                if viewModel.openAddDetailsPage {
+                    AddDetailsView(viewModel: viewModel, place: locationManager.pickedPlaceMark)
+                        .transition(.move(edge: .bottom))
+                        .ignoresSafeArea()
+                        .zIndex(99)
+                }
             }
             .onChange(of:locationManager.pickedPlaceMark?.name, initial:true){
                 oldPlaceMark, newPlaceMark in
                     if newPlaceMark != nil {
-                        viewModel.checkConfirm = true
+                        viewModel.openCheckConfirmSheet = true
                     }
             }
-            
+            .onChange(of:viewModel.finishAdding){
+                print(navigationPath)
+                if viewModel.finishAdding {
+                    locationManager.pickedLocation = nil
+                    locationManager.pickedPlaceMark = nil
+                    navigationPath.removeLast(navigationPath.count)
+                }
+            }
+            .animation(.easeInOut, value: viewModel.openAddDetailsPage)
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: navBackBtn)
-            .sheet(isPresented:$viewModel.checkConfirm){
-                AddLogView(confirm:$viewModel.checkConfirm, viewModel:viewModel)
-                    .presentationDetents([.medium, .large]) // This sets the sheet to either medium or large height
-                            .presentationDragIndicator(.visible)
-                            .onDisappear {
-                                // When the sheet closes, navigate back
-                                print(navigationPath)
-                                if viewModel.finishAdding {
-                                    locationManager.pickedLocation = nil
-                                    locationManager.pickedPlaceMark = nil
-//                                    locationManager.addLogMapView.removeAnnotations(locationManager.addLogMapView.annotations)
-//                                    locationManager.switchMapMode(to: .viewTrips)
-
-                                    navigationPath.removeLast(navigationPath.count)
-                                }
-                            }
+            .sheet(isPresented:$viewModel.openCheckConfirmSheet){
+                CheckConfirmSheetView(confirm:$viewModel.openCheckConfirmSheet, viewModel:viewModel)
+                    .presentationDetents([.medium])
             }
     }
 }

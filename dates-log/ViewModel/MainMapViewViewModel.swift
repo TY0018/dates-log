@@ -10,7 +10,7 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class MainMapViewViewModel: ObservableObject {
-    @Published var currentGroup: String = "No group selected"
+    @Published var currentGroup: String = "Select group to view Dates"
     @Published var showTripDetails: Bool = false
     
     private let locationManager = LocationManager.shared

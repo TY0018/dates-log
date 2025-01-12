@@ -10,6 +10,7 @@ import SwiftUI
 struct MainView: View {
     @StateObject var locationManager: LocationManager = LocationManager.shared
     @StateObject var userManager: UserManager = UserManager.shared
+    
     var body: some View {
         TabView{
             MainMapView()
@@ -20,9 +21,12 @@ struct MainView: View {
                     systemImage: "map.fill")
                 }
             ProfileView()
+                .environmentObject(userManager)
                 .tabItem{
                     Label("Profile", systemImage:"person.crop.circle.fill")
                 }
+                
+            
         }
 //        .edgesIgnoringSafeArea(.bottom)
     }
