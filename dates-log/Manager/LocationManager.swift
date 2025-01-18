@@ -33,10 +33,11 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     @Published var pickedPlaceMark: CLPlacemark?
     
     //MainMapView
-    //selected cur trip locations
-    @Published var curTripLocations: [String: (CLLocationCoordinate2D, [DateInstance])] = [:]
-    //selected trip to display details
-    @Published var selectedTrip: (CLLocationCoordinate2D, [DateInstance])? = nil
+    //selected curTripLocations -> List of placeName: (isFav, location coord, [instances])
+    @Published var curTripLocations: [String: (Bool, CLLocationCoordinate2D, [DateInstance])] = [:]
+    //selected trip to display details -> (placeName, isFav, location coord, [instances])
+    @Published var selectedTrip: (String, Bool, MapAnnotation, [DateInstance])? = nil
+    var isProgrammaticUpdate = false
     
     override private init() {
         super.init()
@@ -123,7 +124,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
             addLogMapView.removeAnnotations(addLogMapView.annotations)
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
-            annotation.title = "Date Location"
+            annotation.title = "Chosen Location"
             print("annotation", annotation)
             addLogMapView.addAnnotation(annotation)
         }
@@ -132,7 +133,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     //addLogMapView: enable dragging
     func mapView(_ mapView: MKMapView, viewFor annotation:MKAnnotation) -> MKAnnotationView? {
         if mapMode == .addLog {
-            let marker = MKMarkerAnnotationView(annotation:annotation, reuseIdentifier:"Date Location")
+            let marker = MKMarkerAnnotationView(annotation:annotation, reuseIdentifier:"Chosen Location")
             marker.isDraggable = true
             marker.canShowCallout = false
             
@@ -175,10 +176,29 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     
     //MainMapView
     //fetch trips for selected group
-    func updateTrips(trips: [String: (CLLocationCoordinate2D, [DateInstance])]){
-        self.curTripLocations = trips
+    func updateTrips(updatedTrips: [String: (Bool, CLLocationCoordinate2D, [DateInstance])]){
+        self.curTripLocations = updatedTrips
         print("update trips")
         updateAnnotations()
+        
+        //if there is a selectedTrip, update the instances from trips
+        if let curTrip = self.selectedTrip?.0,
+           let updatedTripData = updatedTrips[curTrip] {
+            print("updating selectedTrip")
+            // Create a new tuple with updated instances
+            self.selectedTrip = (
+                curTrip, // Keep the same name
+                updatedTripData.0, //Update isFav
+                MapAnnotation(coordinate:updatedTripData.1, title:curTrip),          // Updated coordinate
+                updatedTripData.2          // Updated instances
+            )
+            return
+        } else if self.selectedTrip != nil {
+            print("No more instances, selectedTrip = nil")
+            // If the trip no longer exists in updatedTrips, clear  the selection
+            self.selectedTrip = nil
+            
+        }
         setRegionToFitTrips()
     }
     
@@ -186,48 +206,54 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         guard let annotation = view.annotation else {
             print("unselected")
-            LocationManager.shared.selectedTrip = nil // Safely set selectedTrip to nil when deselected
+            self.selectedTrip = nil // Safely set selectedTrip to nil when deselected
             return
         }
     
         if mapMode == .viewTrips, let title = annotation.title ?? "" {
                 // Find the trip that matches the annotation title using the curTrips dictionary
-                if let tripData = curTripLocations[title] {
+                if let (isFav, coordinates, instances) = curTripLocations[title] {
                     print("selected")
-                    selectedTrip = tripData // Assuming you want to access the tuple (CLLocationCoordinate2D, [DateInstance])
+                    selectedTrip = (title, isFav, MapAnnotation(coordinate:coordinates, title:title), instances) // Assuming you want to access the tuple (placeName, CLLocationCoordinate2D, [DateInstance])
                 } else {
                     print("annotation but no match")
                     LocationManager.shared.selectedTrip = nil
                 }
             }
+        //show the confirmSheet again
+        if mapMode == .addLog {
+            
+        }
     }
     
     // MKMapView Delegate for deselecting annotations
     func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
         if mapMode == .viewTrips {
-            print("deselected")
+            print("Anotatation deselected")
+            if isProgrammaticUpdate{
+                print("Programmatic deselection ignored.")
+                return
+            }
             // Reset the selected trip when no marker is selected
-            LocationManager.shared.selectedTrip = nil
+            self.selectedTrip = nil
         }
-    }
-
-    func removeTrip(by title: String) {
-        //remove specific instance
-        // check if instances is empty, if yes, remove trip
-        curTripLocations.removeValue(forKey: title)
     }
     
     //for MainMapView: showing trip markers
     func updateAnnotations() {
         if mapMode == .viewTrips {
+            print("in updateAnnotations")
+            isProgrammaticUpdate = true //prevent removeAnnotations from triggering deselect mapview func
             mainMapView.removeAnnotations(mainMapView.annotations)
             //ignore 2nd element in the tuple
-            for (placeName, (coordinate, _)) in curTripLocations {
+            for (placeName, (_, coordinate, _)) in curTripLocations {
+                print("adding annotation")
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = coordinate // Use the CLLocationCoordinate2D directly
                 annotation.title = placeName // Use the place name as the title
                 mainMapView.addAnnotation(annotation)
             }
+            isProgrammaticUpdate = false
             print("finish adding new annotations")
         }
     }
@@ -240,7 +266,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
 
 
             // Extract all coordinates from curTrips
-            let coordinates = curTripLocations.map { $0.value.0 } // Get the CLLocationCoordinate2D
+            let coordinates = curTripLocations.map { $0.value.1 } // Get the CLLocationCoordinate2D
 
             // Find the minimum and maximum latitude and longitude
             let minLat = coordinates.map { $0.latitude }.min()!
@@ -256,7 +282,7 @@ class LocationManager: NSObject, ObservableObject, MKMapViewDelegate, CLLocation
             // Calculate the span (the zoom level) based on the difference between min and max coordinates
             let spanLat = maxLat - minLat
             let spanLon = maxLon - minLon
-            let span = MKCoordinateSpan(latitudeDelta: spanLat * 1.2, longitudeDelta: spanLon * 1.2) // Add some padding
+            let span = MKCoordinateSpan(latitudeDelta: max(spanLat * 1.2, 0.01), longitudeDelta: max(spanLon * 1.2, 0.01)) // Add some padding
 
             // Set the region
             let region = MKCoordinateRegion(center: center, span: span)

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		077245E92C949D73006F4E7C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 077245E82C949D73006F4E7C /* .gitignore */; };
 		077245EB2C94A843006F4E7C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 077245EA2C94A843006F4E7C /* GoogleService-Info.plist */; };
-		077245EF2C9F08BE006F4E7C /* TripDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077245EE2C9F08BE006F4E7C /* TripDetailsView.swift */; };
 		077245F12CB29F82006F4E7C /* DateInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077245F02CB29F82006F4E7C /* DateInstance.swift */; };
 		077245F32CB33387006F4E7C /* TripDetailsInstanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077245F22CB33387006F4E7C /* TripDetailsInstanceView.swift */; };
 		077245F52CB89D04006F4E7C /* AddNewGroupViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077245F42CB89D04006F4E7C /* AddNewGroupViewViewModel.swift */; };
@@ -43,15 +42,18 @@
 		077749622C8F3A89001401C5 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077749612C8F3A89001401C5 /* ProfileView.swift */; };
 		077749642C8FE39A001401C5 /* FloatingButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077749632C8FE39A001401C5 /* FloatingButtonView.swift */; };
 		077749672C8FEA6C001401C5 /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077749662C8FEA6C001401C5 /* UserManager.swift */; };
-		0777496A2C8FEB37001401C5 /* AddLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077749692C8FEB37001401C5 /* AddLogView.swift */; };
+		0777496A2C8FEB37001401C5 /* CheckConfirmSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077749692C8FEB37001401C5 /* CheckConfirmSheetView.swift */; };
 		0777496C2C8FECA2001401C5 /* MainMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0777496B2C8FECA2001401C5 /* MainMapView.swift */; };
 		0777496E2C8FECE2001401C5 /* MapViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0777496D2C8FECE2001401C5 /* MapViewHelper.swift */; };
 		077749702C92A14D001401C5 /* DateTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0777496F2C92A14D001401C5 /* DateTextField.swift */; };
 		07A9DF0C2D2DBF2A00F6AD2B /* EditTripDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF0B2D2DBF2A00F6AD2B /* EditTripDetailsView.swift */; };
 		07A9DF0E2D2DC2E100F6AD2B /* EditTripDetailsInstanceViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF0D2D2DC2E100F6AD2B /* EditTripDetailsInstanceViewViewModel.swift */; };
-		07A9DF112D2E9A7600F6AD2B /* CreateGroupPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF102D2E9A7600F6AD2B /* CreateGroupPopupView.swift */; };
+		07A9DF112D2E9A7600F6AD2B /* CreateNewGroupPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF102D2E9A7600F6AD2B /* CreateNewGroupPopupView.swift */; };
 		07A9DF192D32A8AE00F6AD2B /* BlurBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF182D32A8AE00F6AD2B /* BlurBackgroundView.swift */; };
 		07A9DF1B2D32D21B00F6AD2B /* AddLogDetailsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF1A2D32D21B00F6AD2B /* AddLogDetailsOverlayView.swift */; };
+		07A9DF1D2D3713C500F6AD2B /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF1C2D3713C500F6AD2B /* DatabaseManager.swift */; };
+		07A9DF1F2D3A9E7300F6AD2B /* MapAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF1E2D3A9E7300F6AD2B /* MapAnnotation.swift */; };
+		07A9DF212D3AE02500F6AD2B /* AutoScrollingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A9DF202D3AE02500F6AD2B /* AutoScrollingTextView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,7 +77,6 @@
 		077245E82C949D73006F4E7C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		077245EA2C94A843006F4E7C /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		077245EC2C94AA0E006F4E7C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		077245EE2C9F08BE006F4E7C /* TripDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripDetailsView.swift; sourceTree = "<group>"; };
 		077245F02CB29F82006F4E7C /* DateInstance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateInstance.swift; sourceTree = "<group>"; };
 		077245F22CB33387006F4E7C /* TripDetailsInstanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripDetailsInstanceView.swift; sourceTree = "<group>"; };
 		077245F42CB89D04006F4E7C /* AddNewGroupViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNewGroupViewViewModel.swift; sourceTree = "<group>"; };
@@ -104,15 +105,18 @@
 		077749612C8F3A89001401C5 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		077749632C8FE39A001401C5 /* FloatingButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingButtonView.swift; sourceTree = "<group>"; };
 		077749662C8FEA6C001401C5 /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
-		077749692C8FEB37001401C5 /* AddLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLogView.swift; sourceTree = "<group>"; };
+		077749692C8FEB37001401C5 /* CheckConfirmSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckConfirmSheetView.swift; sourceTree = "<group>"; };
 		0777496B2C8FECA2001401C5 /* MainMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMapView.swift; sourceTree = "<group>"; };
 		0777496D2C8FECE2001401C5 /* MapViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewHelper.swift; sourceTree = "<group>"; };
 		0777496F2C92A14D001401C5 /* DateTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTextField.swift; sourceTree = "<group>"; };
 		07A9DF0B2D2DBF2A00F6AD2B /* EditTripDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTripDetailsView.swift; sourceTree = "<group>"; };
 		07A9DF0D2D2DC2E100F6AD2B /* EditTripDetailsInstanceViewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTripDetailsInstanceViewViewModel.swift; sourceTree = "<group>"; };
-		07A9DF102D2E9A7600F6AD2B /* CreateGroupPopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupPopupView.swift; sourceTree = "<group>"; };
+		07A9DF102D2E9A7600F6AD2B /* CreateNewGroupPopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNewGroupPopupView.swift; sourceTree = "<group>"; };
 		07A9DF182D32A8AE00F6AD2B /* BlurBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurBackgroundView.swift; sourceTree = "<group>"; };
 		07A9DF1A2D32D21B00F6AD2B /* AddLogDetailsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLogDetailsOverlayView.swift; sourceTree = "<group>"; };
+		07A9DF1C2D3713C500F6AD2B /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
+		07A9DF1E2D3A9E7300F6AD2B /* MapAnnotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapAnnotation.swift; sourceTree = "<group>"; };
+		07A9DF202D3AE02500F6AD2B /* AutoScrollingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoScrollingTextView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -251,6 +255,7 @@
 				0777492D2C8B0D72001401C5 /* LocationManager.swift */,
 				077749662C8FEA6C001401C5 /* UserManager.swift */,
 				0777494D2C8C7BC8001401C5 /* AuthenticationManager.swift */,
+				07A9DF1C2D3713C500F6AD2B /* DatabaseManager.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -261,6 +266,7 @@
 				0777495D2C8EA3C1001401C5 /* User.swift */,
 				0777495F2C8EA40D001401C5 /* DateEvent.swift */,
 				077245F02CB29F82006F4E7C /* DateInstance.swift */,
+				07A9DF1E2D3A9E7300F6AD2B /* MapAnnotation.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -273,7 +279,7 @@
 				077749632C8FE39A001401C5 /* FloatingButtonView.swift */,
 				0777492F2C8B1689001401C5 /* AddLogMapView.swift */,
 				0777496B2C8FECA2001401C5 /* MainMapView.swift */,
-				077749692C8FEB37001401C5 /* AddLogView.swift */,
+				077749692C8FEB37001401C5 /* CheckConfirmSheetView.swift */,
 				0777496D2C8FECE2001401C5 /* MapViewHelper.swift */,
 				0777496F2C92A14D001401C5 /* DateTextField.swift */,
 				07A9DF1A2D32D21B00F6AD2B /* AddLogDetailsOverlayView.swift */,
@@ -292,7 +298,6 @@
 		07A9DF0A2D2DBE6F00F6AD2B /* TripDetailsViews */ = {
 			isa = PBXGroup;
 			children = (
-				077245EE2C9F08BE006F4E7C /* TripDetailsView.swift */,
 				077245F22CB33387006F4E7C /* TripDetailsInstanceView.swift */,
 				07A9DF0B2D2DBF2A00F6AD2B /* EditTripDetailsView.swift */,
 			);
@@ -302,8 +307,9 @@
 		07A9DF0F2D2E9A6000F6AD2B /* ReusableViews */ = {
 			isa = PBXGroup;
 			children = (
-				07A9DF102D2E9A7600F6AD2B /* CreateGroupPopupView.swift */,
+				07A9DF102D2E9A7600F6AD2B /* CreateNewGroupPopupView.swift */,
 				07A9DF182D32A8AE00F6AD2B /* BlurBackgroundView.swift */,
+				07A9DF202D3AE02500F6AD2B /* AutoScrollingTextView.swift */,
 			);
 			path = ReusableViews;
 			sourceTree = "<group>";
@@ -455,8 +461,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0777496A2C8FEB37001401C5 /* AddLogView.swift in Sources */,
+				0777496A2C8FEB37001401C5 /* CheckConfirmSheetView.swift in Sources */,
 				077749322C8C3242001401C5 /* AddLogMapViewViewModel.swift in Sources */,
+				07A9DF1D2D3713C500F6AD2B /* DatabaseManager.swift in Sources */,
 				077749492C8C787E001401C5 /* MainView.swift in Sources */,
 				077749452C8C60F3001401C5 /* LoginView.swift in Sources */,
 				077245F12CB29F82006F4E7C /* DateInstance.swift in Sources */,
@@ -465,7 +472,8 @@
 				0777492E2C8B0D72001401C5 /* LocationManager.swift in Sources */,
 				077749472C8C6128001401C5 /* MainMapViewViewModel.swift in Sources */,
 				07A9DF0E2D2DC2E100F6AD2B /* EditTripDetailsInstanceViewViewModel.swift in Sources */,
-				07A9DF112D2E9A7600F6AD2B /* CreateGroupPopupView.swift in Sources */,
+				07A9DF1F2D3A9E7300F6AD2B /* MapAnnotation.swift in Sources */,
+				07A9DF112D2E9A7600F6AD2B /* CreateNewGroupPopupView.swift in Sources */,
 				077749672C8FEA6C001401C5 /* UserManager.swift in Sources */,
 				0777496E2C8FECE2001401C5 /* MapViewHelper.swift in Sources */,
 				0777494E2C8C7BC8001401C5 /* AuthenticationManager.swift in Sources */,
@@ -473,6 +481,7 @@
 				077749302C8B1689001401C5 /* AddLogMapView.swift in Sources */,
 				07A9DF192D32A8AE00F6AD2B /* BlurBackgroundView.swift in Sources */,
 				0777495E2C8EA3C1001401C5 /* User.swift in Sources */,
+				07A9DF212D3AE02500F6AD2B /* AutoScrollingTextView.swift in Sources */,
 				0777496C2C8FECA2001401C5 /* MainMapView.swift in Sources */,
 				07A9DF0C2D2DBF2A00F6AD2B /* EditTripDetailsView.swift in Sources */,
 				0777492C2C8B0D3F001401C5 /* SearchView.swift in Sources */,
@@ -483,7 +492,6 @@
 				077749622C8F3A89001401C5 /* ProfileView.swift in Sources */,
 				077748FE2C8B0D16001401C5 /* dates_logApp.swift in Sources */,
 				077245F52CB89D04006F4E7C /* AddNewGroupViewViewModel.swift in Sources */,
-				077245EF2C9F08BE006F4E7C /* TripDetailsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

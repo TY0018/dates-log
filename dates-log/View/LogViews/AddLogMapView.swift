@@ -76,7 +76,7 @@ struct AddLogMapView: View, Hashable {
             .navigationBarItems(leading: navBackBtn)
             .sheet(isPresented:$viewModel.openCheckConfirmSheet){
                 CheckConfirmSheetView(confirm:$viewModel.openCheckConfirmSheet, viewModel:viewModel)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.fraction(0.4)])
             }
     }
 }

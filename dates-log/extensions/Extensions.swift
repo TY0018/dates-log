@@ -63,3 +63,10 @@ extension UITabBar {
         UITabBar.appearance().scrollEdgeAppearance = appearance // This makes sure it also works for scrollable content.
     }
 }
+
+extension String: Identifiable {
+    public typealias ID = Int
+    public var id: Int {
+        return hash
+    }
+}

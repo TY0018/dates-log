@@ -24,7 +24,7 @@ struct AddDetailsView: View {
             ScrollView{
                 VStack{
                     //page title
-                    HStack{
+                    HStack(spacing:20){
                         Button {
                             viewModel.openAddDetailsPage = false
                             //reopen confirmLocation sheet
@@ -36,33 +36,20 @@ struct AddDetailsView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .font(.title2.bold())
-                    .padding(.top, 50)
-                    .padding(.horizontal)
+                    .padding(.top, 40)
+                    .padding(.horizontal, -10)
                     
                     Spacer()
                     
                     VStack(spacing:15){
-                        
                         VStack(alignment:.leading, spacing: 6){
                             Text("Location")
                                 .font(.headline)
                                 .foregroundStyle(Color("MainPurple"))
                                 .frame(maxWidth: .infinity, alignment:.leading)
                                 .padding(.top, 3)
-                            HStack{
                                 Text(place?.name ?? "")
                                     .font(.title3.bold())
-                                Spacer()
-                                Image(systemName: viewModel.isFavourite ? "suit.heart.fill" : "suit.heart")
-                                    .font(.title)  // Adjust the font size as needed
-                                    .foregroundColor(viewModel.isFavourite ? .pink : .gray)  // Change color based on state
-                                    .onTapGesture {
-                                        // Toggle the heart image state
-                                        viewModel.setFav(!viewModel.isFavourite)
-                                    }
-                            }
-        //                    .padding()
-                            .frame(maxWidth:.infinity)
                         }
                         VStack(alignment:.leading, spacing: 6){
                             Text("Friend group")
@@ -80,9 +67,16 @@ struct AddDetailsView: View {
                                 }
                                 
                                 // Add a "Create New Trip" option at the end
-                                Text("Create New Group").tag("Create New Group" as String)
+                                HStack{
+                                    Image(systemName: "plus")
+                                    Spacer()
+                                    Text("Create New Group")
+                                }
+                                .frame(maxWidth:.infinity)
+                                .tag("Create New Group" as String)
                             }
-                            .pickerStyle(DefaultPickerStyle())
+                            .pickerStyle(.menu)
+
                             .frame(maxWidth:.infinity)
                             .padding()
                             .onChange(of: viewModel.group) {
@@ -162,18 +156,17 @@ struct AddDetailsView: View {
                         }
                         
                     }
-                    .padding(.horizontal)
                     
                     Spacer()
-                    
+                    if let message = viewModel.errorMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .frame(maxWidth:.infinity)
+                    }
                     Button{
                         //Add to trip in firebase
                         viewModel.saveDate()
-                        //close the sheet and navigate back to main map view
-                        viewModel.openCheckConfirmSheet = false
-                        //close the addDetails page overlay
-                        viewModel.openAddDetailsPage = false
-                        viewModel.finishAdding = true
                     } label: {
                         Text("Add event")
                             .fontWeight(.semibold)
@@ -186,10 +179,10 @@ struct AddDetailsView: View {
                             .foregroundColor(.white)
                     }
                     .disabled(!viewModel.canSave) // Disable button until all required fields are filled
-                    .padding()
+//                    .padding()
                     .frame(maxWidth:.infinity,maxHeight:.infinity)
                 }
-                .padding()
+                .padding(30)
             }
             //show CreateNewGroupPopUp
             if viewModel.openCreateNewGroupPopUp {
@@ -197,6 +190,12 @@ struct AddDetailsView: View {
                     .transition(.scale)
             }
         }
+//        .alert(item: $viewModel.errorMessage) {
+//            errorMessage in
+//            Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")){
+////                viewModel.errorMessage = nil
+//            })
+//        }
         .navigationBarHidden(true) // Hides navigation bar
         .frame(maxWidth:.infinity,maxHeight:.infinity, alignment:.leading)
     }

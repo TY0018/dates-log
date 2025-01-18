@@ -7,7 +7,7 @@
 
 import Foundation
 
-
+@MainActor
 class AddNewGroupViewViewModel: ObservableObject {
     @Published var groupExistsError: Bool = false
     

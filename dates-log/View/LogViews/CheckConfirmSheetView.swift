@@ -31,9 +31,13 @@ struct CheckConfirmSheetView: View {
                     Image(systemName:"mappin.circle.fill")
                         .font(.title2)
                         .foregroundColor(.gray)
-                    VStack(alignment:.leading, spacing: 6){
-                        Text(place.name ?? "")
+                    VStack(alignment:.leading, spacing: 2){
+//                        Text(place.name ?? "")
+//                            .font(.title3.bold())
+                        AutoScrollingTextView(text: place.name ?? "", duration: 10)
                             .font(.title3.bold())
+//                                    .frame(height: 50)
+//                                    .border(Color.gray)
                         Text(place.thoroughfare ?? "")
                             .font(.caption)
                             .foregroundColor(.gray)

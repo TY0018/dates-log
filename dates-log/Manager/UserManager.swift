@@ -16,7 +16,9 @@ class UserManager: ObservableObject {
     @Published var groups: [String] = []
     @Published var userId: String = ""
     @Published var createGroupFail: Bool = false
-    @Published var user: User?
+    @Published var user: User? = nil
+    
+    private let db = Firestore.firestore()
     
     private init(){
         //initialise user
@@ -27,14 +29,14 @@ class UserManager: ObservableObject {
         Task {
             let fetchedUser = await fetchUserDetails()
             await MainActor.run {
-                self.user = fetchedUser
+                self.user = fetchedUser!
             }
+            await ensuresFavouritesGroupExists()
         }
     }
     
-    func fetchUserDetails() async -> User? {
+    private func fetchUserDetails() async -> User? {
             do {
-                let db = Firestore.firestore()
                 let document = try await db.collection("users")
                     .document(self.userId)
                     .getDocument()
@@ -51,12 +53,32 @@ class UserManager: ObservableObject {
             }
     }
     
+    private func ensuresFavouritesGroupExists() async {
+        let groupRef = db.collection("users").document(userId).collection("groups").document("Favourites")
+                
+                do {
+                    let document = try await groupRef.getDocument()
+                    if !document.exists {
+                        // "Favourites" group does not exist, create it
+                        try await groupRef.setData(["tripIds": []])
+                        print("Created 'Favourites' group for user.")
+                    } else {
+                        print("'Favourites' group already exists.")
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.createGroupFail = true
+                    }
+                    print("Error checking or creating 'Favourites' group: \(error)")
+                }
+    }
+    
     func fetchGroups() {
         guard let uId = Auth.auth().currentUser?.uid else {
             print("Cant fetch groups as user is not logged in.")
             return
         }
-        let db = Firestore.firestore()
+        
         db.collection("users")
             .document(uId)
             .collection("groups")
@@ -75,7 +97,7 @@ class UserManager: ObservableObject {
             return
         }
         print("Creating new group")
-        let db = Firestore.firestore()
+
         do {
             try await db.collection("users")
                 .document(self.userId)
@@ -100,8 +122,6 @@ class UserManager: ObservableObject {
             return true
         }
 
-        let db = Firestore.firestore()
-
         do {
             let snapshot = try await db.collection("users")
                 .document(self.userId)
@@ -120,78 +140,78 @@ class UserManager: ObservableObject {
     }
     
     // Fetch trips and pass them to the location manager
-    func fetchTrips(for group: String) {
-        Task {
-            let trips: [String: (CLLocationCoordinate2D, [DateInstance])]
-            do {
-                if group == "Favourites" {
-                    trips = try await fetchFav()
-                } else {
-                    trips = try await fetchTrips(group: group)
-                }
-                DispatchQueue.main.async {
-                    LocationManager.shared.updateTrips(trips: trips)
-                }
-            } catch {
-                print("Error fetching trips: \(error)")
-            }
-        }
-    }
-    
-    private func fetchTrips(group: String) async throws -> [String: (CLLocationCoordinate2D, [DateInstance])] {
-        let db = Firestore.firestore()
-
-        do {
-            // Fetch the trips from trip collection
-            let snapshot = try await db.collection("users")
-                .document(self.userId)
-                .collection("groups")
-                .document(group)
-                .collection("trips")
-                .getDocuments()
-            
-            //key: location Name, value: (coordinates, [dateInstance])
-            var tripsDictionary: [String: (CLLocationCoordinate2D, [DateInstance])] = [:]
-            
-            // Iterate through each trip document
-            for document in snapshot.documents {
-                // Extract placeName and coordinate from the trip document
-                let placeName = document.documentID
-                guard let coordinate = document.get("coordinate") as? GeoPoint else {
-                    print("Failed to get coordinates for trip \(placeName)")
-                    continue
-                }
-
-                // Fetch instances (nested documents under each trip document, instances collection)
-                let instancesSnapshot = try await db.collection("users")
-                    .document(self.userId)
-                    .collection("groups")
-                    .document(group)
-                    .collection("trips")
-                    .document(placeName) // Use placeName as the trip document ID
-                    .collection("instances")
-                    .getDocuments()
-                
-                // Decode each instance into DateInstance objects
-                let events = instancesSnapshot.documents.compactMap { instanceDoc -> DateInstance? in
-                    do {
-                        return try instanceDoc.data(as: DateInstance.self)
-                    } catch {
-                        print("Failed to decode document: \(instanceDoc.documentID), error: \(error)")
-                        return nil
-                    }
-                }
-                let sortedEvents = events.sorted(by: { $0.date > $1.date }) // Sort from most recent to earliest
-                // Add the placeName and corresponding data to the dictionary
-                tripsDictionary[placeName] = (CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude), sortedEvents)
-            }
-            print("trips in user manager: ", tripsDictionary)
-            return tripsDictionary
-        } catch {
-            print("Error fetching trips: \(error)")
-            throw error
-        }
-    }
+//    func fetchTrips(for group: String) {
+//        Task {
+//            let trips: [String: (CLLocationCoordinate2D, [DateInstance])]
+//            do {
+//                if group == "Favourites" {
+//                    trips = try await fetchFav()
+//                } else {
+//                    trips = try await fetchTrips(group: group)
+//                }
+//                DispatchQueue.main.async {
+//                    LocationManager.shared.updateTrips(updatedTrips: trips)
+//                }
+//            } catch {
+//                print("Error fetching trips: \(error)")
+//            }
+//        }
+//    }
+//    
+//    private func fetchTrips(group: String) async throws -> [String: (CLLocationCoordinate2D, [DateInstance])] {
+//        let db = Firestore.firestore()
+//
+//        do {
+//            // Fetch the trips from trip collection
+//            let snapshot = try await db.collection("users")
+//                .document(self.userId)
+//                .collection("groups")
+//                .document(group)
+//                .collection("trips")
+//                .getDocuments()
+//            
+//            //key: location Name, value: (coordinates, [dateInstance])
+//            var tripsDictionary: [String: (CLLocationCoordinate2D, [DateInstance])] = [:]
+//            
+//            // Iterate through each trip document
+//            for document in snapshot.documents {
+//                // Extract placeName and coordinate from the trip document
+//                let placeName = document.documentID
+//                guard let coordinate = document.get("coordinate") as? GeoPoint else {
+//                    print("Failed to get coordinates for trip \(placeName)")
+//                    continue
+//                }
+//
+//                // Fetch instances (nested documents under each trip document, instances collection)
+//                let instancesSnapshot = try await db.collection("users")
+//                    .document(self.userId)
+//                    .collection("groups")
+//                    .document(group)
+//                    .collection("trips")
+//                    .document(placeName) // Use placeName as the trip document ID
+//                    .collection("instances")
+//                    .getDocuments()
+//                
+//                // Decode each instance into DateInstance objects
+//                let events = instancesSnapshot.documents.compactMap { instanceDoc -> DateInstance? in
+//                    do {
+//                        return try instanceDoc.data(as: DateInstance.self)
+//                    } catch {
+//                        print("Failed to decode document: \(instanceDoc.documentID), error: \(error)")
+//                        return nil
+//                    }
+//                }
+//                let sortedEvents = events.sorted(by: { $0.date > $1.date }) // Sort from most recent to earliest
+//                // Add the placeName and corresponding data to the dictionary
+//                tripsDictionary[placeName] = (CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude), sortedEvents)
+//            }
+//            print("trips in user manager: ", tripsDictionary)
+//            return tripsDictionary
+//        } catch {
+//            print("Error fetching trips: \(error)")
+//            throw error
+//        }
+//    }
     
     func fetchFav() async throws -> [String: (CLLocationCoordinate2D, [DateInstance])] {
         let db = Firestore.firestore()

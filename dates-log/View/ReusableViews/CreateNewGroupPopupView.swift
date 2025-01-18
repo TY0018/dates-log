@@ -17,7 +17,7 @@ struct CreateNewGroupPopupView: View {
     var body: some View {
         ZStack{
             Color.black.opacity(0.4)
-                .edgesIgnoringSafeArea(.all) // Background blur effect
+                .ignoresSafeArea() // Background blur effect
                 .onTapGesture {
                     isPresented = false // Dismiss pop-up on tap
                     curGroupName = "No group selected"
@@ -62,37 +62,12 @@ struct CreateNewGroupPopupView: View {
                 }
             }
             .padding()
-            .frame(width: 300, height: 200)
             .background(Color.white)
             .cornerRadius(10)
             .shadow(radius: 10)
+            .padding()
         }
+        .frame(maxWidth:.infinity,maxHeight:.infinity, alignment:.leading)
         .animation(.easeInOut, value: isPresented)
     }
 }
-
-//struct CreateNewGroupPopupView: View {
-//    @State private var showPopup = false
-//    @Binding var curGroupName: String
-//    
-//    var body: some View {
-//        ZStack {
-//            VStack {
-//                Text("Main Content")
-//                    .font(.largeTitle)
-//                Button("Show Pop-Up") {
-//                    showPopup = true
-//                }
-//            }
-//            if showPopup {
-//                Color.black.opacity(0.4)
-//                    .edgesIgnoringSafeArea(.all) // Background blur effect
-//                    .onTapGesture {
-//                        showPopup = false // Dismiss pop-up on tap
-//                    }
-//                PopupView(isPresented: $showPopup, curGroupName: $curGroupName)
-//            }
-//        }
-//        .animation(.easeInOut, value: showPopup)
-//    }
-//}
